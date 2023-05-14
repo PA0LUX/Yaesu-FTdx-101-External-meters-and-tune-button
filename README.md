@@ -1,7 +1,7 @@
 # Yaesu-FTdx-101-External-meters-and-tune-button
 How to build an Arduino driven external meter display with a tune button for a Yaesu FTdx-101
 
-See also You Tube: 
+See also You Tube: https://youtu.be/S7MPvK0BMc8
 
 Note: this sketch was made for an FTdx-101D. When used on a FTdx-101MP, the power meter will not show the correct power output since it has double the power. You will have to adjust the scale (-numbers) in the .ino file.
 
