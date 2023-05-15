@@ -8,7 +8,7 @@
   It also has an external tune button possibility. Just add a momentary pushbutton (if desired).
   On button press: it reads present power and mode setting, then sets PWR to a selected value, mode to FM-N, then enables the MOX.
   On button release: it disables the TX and restores original power and mode settings.
-  This software is written by Eeltje Luxen, PA0LUX and is in the public domain. You may not sell this code.
+  This software is written by Eeltje Luxen, PA0LUX and is in the public domain.
   Set FTdx-101 RS232 connection to 19200 bps.
   This is version 1.0, april 2023, it has been tested on an Arduino UNO and NANO.
 */
