@@ -1,8 +1,7 @@
 
 /*
   This is a sketch for 9 bargraph meters on a 240 x 320, 2.8 TFT display (touch is not used) with ILI9341 for the Yaesu FTdx-101D.
-  It can probably also be used on the MP model, however the scale for the power output will not be correct. I do not have an MP to test this.
-  You can change the scale text yourself in "void draw_PO_meter()"
+  For the FTdx-101MP there is a different .INO file.
   It uses CAT commands through the RS232 port of the radio. It measures all 9 meters of the radio.
   It checks with a green/red indication if there is connection with the radio with the correct baudrate.
   It also has an external tune button possibility. Just add a momentary pushbutton (if desired).
@@ -10,7 +9,7 @@
   On button release: it disables the TX and restores original power and mode settings.
   This software is written by Eeltje Luxen, PA0LUX and is in the public domain.
   Set FTdx-101 RS232 connection to 19200 bps.
-  This is version 1.0, april 2023, it has been tested on an Arduino UNO and NANO.
+  This is version 1.0.1, may 2023, only text changes, no code change since v1.0. it has been tested on an Arduino UNO and NANO.
 */
 
 
@@ -762,7 +761,7 @@ void draw_PO_meter() {
   tft.setCursor((X + 32), Y + 185);
   tft.println(".");                                                 // display PO = dot scale text 5W
   tft.setCursor((X + 51), Y + 175);
-  tft.println("10");                                                // display PO = 10 scale text white
+  tft.println("10");                                                // display PO = 10 scale text
   tft.setCursor((X + 54), Y + 185);
   tft.println(".");                                                 // display PO = dot scale text 10W
   tft.setCursor((X + 82), Y + 185);
@@ -772,7 +771,7 @@ void draw_PO_meter() {
   tft.setCursor((X + 128), Y + 185);
   tft.println(".");                                                 // display PO = dot scale text 40W
   tft.setCursor((X + 147), Y + 175);
-  tft.println("50");                                                 // display PO = 50W scale text white
+  tft.println("50");                                                 // display PO = 50W scale text
   tft.setCursor((X + 147), Y + 185);
   tft.println(".");                                                 // display PO = dot scale text 50W
   tft.setCursor((X + 159), Y + 185);
@@ -784,7 +783,7 @@ void draw_PO_meter() {
   tft.setCursor((X + 193), Y + 185);
   tft.println(".");                                                 // display PO = dot scale text 90W
   tft.setCursor((X + 194), Y + 175);
-  tft.println("100");                                               // display PO = 100W scale text white
+  tft.println("100");                                               // display PO = 100W scale text
   tft.setCursor((X + 200), Y + 185);
   tft.setTextColor(ILI9341_RED);
   tft.println(".");                                                 // display PO = dot scale text 100W RED
