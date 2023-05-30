@@ -1,5 +1,6 @@
 # Yaesu-FTdx-101-External-meters-and-tune-button
 How to build an Arduino driven external meter display with a tune button for a Yaesu FTdx-101
+With special thanks to John, G4BEH for his contributions.
 
 See also You Tube: https://youtu.be/S7MPvK0BMc8
 
