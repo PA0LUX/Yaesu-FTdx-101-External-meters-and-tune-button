@@ -7,15 +7,18 @@
   It also has an external tune button possibility. Just add a momentary pushbutton (if desired).
   On button press: it reads present power and mode setting, then sets PWR to a selected value, mode to FM-N, then enables the MOX.
   On button release: it disables the TX and restores original power and mode settings.
-  This software is written by Eeltje Luxen, PA0LUX and is in the public domain.
+  This software is written by Eeltje Luxen, PA0LUX. With contributions of John, G4BEH and is in the public domain.
   Set FTdx-101 RS232 connection to 19200 bps.
-  This is version 1.0.1, may 2023, only text changes, no code change since v1.0. it has been tested on an Arduino UNO and NANO.
+  version 1.0 first release
+  version 1.0.2, may 2023, only comment changes, no code change since v1.0. it has been tested on an Arduino UNO and NANO.
+  This is version 1.1, may 2023,comment changes + red dots added to power scale and avaraging on the temperature reading.
 */
 
 
 #include "SPI.h"                                          // make sure you have these in your library
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
+#include "Smoothed.h"                                     // library used for smoothening the temp reading
 #define cs   10                                           // these are the connections for the NANO, regarding display 
 #define dc   9                                            // these are the connections for the NANO, regarding display 
 #define rst  7                                            // these are the connections for the NANO, regarding display 
@@ -23,7 +26,7 @@
 #define switchPin  2                                      // Tune button is connected to NANO pin 2
 #define set_tune_pwr "PC020;"                             // set tune power, you can choose which PWR to use for tuning (005 - 100 W)
 #define timeout_delay 10;                                 // delay to flag a data timeout from the radio, now set at 10 mSec, same as in radio
-
+Smoothed <float> smoothed_temp;                           // Create an instance of the class to use.
 
 byte X = 55;                   // starting point of meter bars from left
 byte Y = 18;                   // row of complete meter: bar, outline and text
@@ -81,6 +84,8 @@ void setup() {
   Serial.begin(19200, SERIAL_8N2);           // RS232 connection speed to FTdx101, NOTE 2 stopbits
   pinMode(switchPin, INPUT);                 // set the Tune button pin as input
 
+  smoothed_temp.begin(SMOOTHED_EXPONENTIAL, 10);           // set the filter level to 10. Higher numbers will result in less filtering
+
   tft.begin();
   tft.setRotation(1);                                       // set display orientation
   tft.fillScreen(ILI9341_BLACK);                            // fill background with black
@@ -96,7 +101,7 @@ void setup() {
   tft.setTextColor(ILI9341_WHITE);
   tft.println("Eeltje Luxen - PA0LUX");
   tft.setCursor(240, 220);
-  tft.println("v1.0");
+  tft.println("v1.1");
   delay(2000);                                                    // show welcome screen for 2000 mS
 
   tft.fillScreen(ILI9341_BACKGROUND);                             // fill background with selected color
@@ -236,52 +241,52 @@ void setup() {
   tft.setCursor((X + 4), Y + 201);
   tft.println("1");                                                 // display S = 1 scale text, 1 S point = 14 pixels
   tft.setCursor((X + 4), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 11), Y + 201);
   tft.println("2");                                                 // display S = 2 scale text yellow
   tft.setCursor((X + 11), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 28), Y + 201);
   tft.println("3");                                                 // display S = 3 scale text yellow
   tft.setCursor((X + 28), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 48), Y + 201);
   tft.println("4");                                                 // display S = 4 scale text yellow
   tft.setCursor((X + 48), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 65), Y + 201);
   tft.println("5");                                                 // display S = 5 scale text yellow
   tft.setCursor((X + 65), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 80), Y + 201);
   tft.println("6");                                                 // display S = 6 scale text yellow
   tft.setCursor((X + 80), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 95), Y + 201);
   tft.println("7");                                                 // display S = 7 scale text yellow
   tft.setCursor((X + 95), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 113), Y + 201);
   tft.println("8");                                                 // display S = 8 scale text yellow
   tft.setCursor((X + 113), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 131), Y + 201);
   tft.println("9");                                                 // display S = 9 scale text yellow
   tft.setCursor((X + 131), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setTextColor(ILI9341_RED);                                    // set textcolor to red
   tft.setCursor((X + 170), Y + 201);
   tft.println("20");                                                // display S = 20 scale text red
   tft.setCursor((X + 170), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 207), Y + 201);
   tft.println("40");                                                // display S = 40 scale text red
   tft.setCursor((X + 207), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 240), Y + 201);
   tft.println("60");                                                // display S = 60 scale text red
   tft.setCursor((X + 250), Y + 211);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setTextColor(ILI9341_WHITE);                                  // make text white
 
   // print the text- connection status & Power set to
@@ -306,9 +311,9 @@ void loop() {
   do
   { t = Serial.read();                                              // this is to empty the input buffer when starting reading data from radio,
   } while (Serial.available() > 0);                                 // buffer contains erratic data when the radio is switched on (fix power up sequence)
-  Serial.print("TX;");                                              // send CAT command to the radio, ask for receiver statusses
+  Serial.print("TX;");                                              // send CAT command to the radio, ask for TX status
   get_radio_response();                                             // call routine to read from radio
-  if (CAT_buffer.startsWith("TX")) {                                // if the answer is correct (it should start with FR)
+  if (CAT_buffer.startsWith("TX")) {                                // if the answer is correct (it should start with TX)
     constatus = true;                                               // connection status is ok, green light must be turned on
   }
   else {                                                            // we do not get a (correct-) answer
@@ -342,7 +347,7 @@ void loop() {
 
   // check if in TX, if yes then draw PO meter, otherwise draw Main S meter, do these only once to avoid flicker
 
-  Serial.print("TX;");                                              // send CAT command to the radio, ask for receiver statusses
+  Serial.print("TX;");                                              // send CAT command to the radio, ask for TX status
   get_radio_response();                                             // call routine to read from radio
   if ((((CAT_buffer.startsWith("TX2")) || (CAT_buffer.startsWith("TX1"))) && (txrx_flag1 == false))) {  // ask if the FTdx101 is in TX (PTT or CAT, for the first loop)
     draw_PO_meter();                                                // draw the PO meter outline, can be substituted by Main S meter
@@ -465,7 +470,8 @@ void loop() {
   get_radio_response();                                    // call routine to read from radio
   convert_CAT_buffer();                                    // CAT_buffer holds received string in format: RMNVVV000; N=meternumber, VVV is wanted value
   Temp = CAT_buffer.toInt();                               // store string as int in Temp to be displayed as temperature meter bar
-
+  smoothed_temp.add(float(Temp));                          // add the new value to the value stores
+  Temp = (int(smoothed_temp.get()));                       // get the smoothed values
 
   // here the meter bargraphs are filled with the measured values which were received from the radio
 
@@ -676,7 +682,7 @@ void convert_CAT_buffer()                                   // get the wanted da
 
 void show_status() {                                      // this routine shows a red or green connection statusled on the display
 
-  tft.drawCircle(75 + X, 157, 6, ILI9341_BLACK);         // outline of cicle is black
+  tft.drawCircle(75 + X, 157, 6, ILI9341_BLACK);         // outline of circle is black
   if (constatus == false) {
     tft.fillCircle(75 + X, 157, 5, ILI9341_RED);         // red led if status is false
   }
@@ -698,52 +704,52 @@ void draw_M_S_meter() {
   tft.setCursor((X + 4), Y + 175);
   tft.println("1");                                                 // display S = 1 scale text, 1 S point = 14 pixels
   tft.setCursor((X + 4), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 11), Y + 175);
   tft.println("2");                                                 // display S = 2 scale text white
   tft.setCursor((X + 11), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 28), Y + 175);
   tft.println("3");                                                 // display S = 3 scale text white
   tft.setCursor((X + 28), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 48), Y + 175);
   tft.println("4");                                                 // display S = 4 scale text white
   tft.setCursor((X + 48), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 65), Y + 175);
   tft.println("5");                                                 // display S = 5 scale text white
   tft.setCursor((X + 65), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 80), Y + 175);
   tft.println("6");                                                 // display S = 6 scale text white
   tft.setCursor((X + 80), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 95), Y + 175);
   tft.println("7");                                                 // display S = 7 scale text white
   tft.setCursor((X + 95), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 113), Y + 175);
   tft.println("8");                                                 // display S = 8 scale text white
   tft.setCursor((X + 113), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 131), Y + 175);
   tft.println("9");                                                 // display S = 9 scale text white
   tft.setCursor((X + 131), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setTextColor(ILI9341_RED);                                    // set textcolor to red
   tft.setCursor((X + 170), Y + 175);
   tft.println("20");                                                // display S = 20 scale text red
   tft.setCursor((X + 170), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 207), Y + 175);
   tft.println("40");                                                // display S = 40 scale text red
   tft.setCursor((X + 207), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
   tft.setCursor((X + 240), Y + 175);
   tft.println("60");                                                // display S = 60 scale text red
   tft.setCursor((X + 250), Y + 185);
-  tft.println(".");                                                 // display S = dot scale text
+  tft.println(".");                                                 // display S = dot scale
 }
 
 void draw_PO_meter() {
@@ -759,45 +765,46 @@ void draw_PO_meter() {
   tft.setCursor((X + 4), Y + 175);
   tft.println("0");                                                 // display PO = 0 scale text, power 0W
   tft.setCursor((X + 32), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 5W
+  tft.println(".");                                                 // display PO = dot scale 5W
   tft.setCursor((X + 51), Y + 175);
   tft.println("10");                                                // display PO = 10 scale text
-  tft.setCursor((X + 54), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 10W
+
   tft.setCursor((X + 82), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 20W
+  tft.println(".");                                                 // display PO = dot scale 20W
   tft.setCursor((X + 104), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 30W
+  tft.println(".");                                                 // display PO = dot scale 30W
   tft.setCursor((X + 128), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 40W
+  tft.println(".");                                                 // display PO = dot scale 40W
   tft.setCursor((X + 147), Y + 175);
   tft.println("50");                                                 // display PO = 50W scale text
-  tft.setCursor((X + 147), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 50W
   tft.setCursor((X + 159), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 60W
+  tft.println(".");                                                 // display PO = dot scale 60W
   tft.setCursor((X + 169), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 70W
+  tft.println(".");                                                 // display PO = dot scale 70W
   tft.setCursor((X + 183), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 80W
+  tft.println(".");                                                 // display PO = dot scale 80W
   tft.setCursor((X + 193), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 90W
+  tft.println(".");                                                 // display PO = dot scale 90W
   tft.setCursor((X + 194), Y + 175);
   tft.println("100");                                               // display PO = 100W scale text
-  tft.setCursor((X + 200), Y + 185);
   tft.setTextColor(ILI9341_RED);
-  tft.println(".");                                                 // display PO = dot scale text 100W RED
+  tft.setCursor((X + 200), Y + 185);
+  tft.println(".");                                                 // display PO = dot scale 100W RED
+  tft.setCursor((X + 54), Y + 185);
+  tft.println(".");                                                 // display PO = dot scale 10W
+  tft.setCursor((X + 147), Y + 185);
+  tft.println(".");                                                 // display PO = dot scale 50W
+  tft.setCursor((X + 248), Y + 185);
+  tft.println(".");                                                 // display PO = dot scale 150W
   tft.setTextColor(ILI9341_BLUE);
   tft.setCursor((X + 208), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 110W
+  tft.println(".");                                                 // display PO = dot scale 110W
   tft.setCursor((X + 218), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 120W
+  tft.println(".");                                                 // display PO = dot scale 120W
   tft.setCursor((X + 228), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 130W
+  tft.println(".");                                                 // display PO = dot scale 130W
   tft.setCursor((X + 238), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 140W
-  tft.setCursor((X + 248), Y + 185);
-  tft.println(".");                                                 // display PO = dot scale text 150W
+  tft.println(".");                                                 // display PO = dot scale 140W
   tft.setCursor((X + 248), Y + 175);
   tft.println("W");                                                 // display scale text W
 }
