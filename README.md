@@ -3,7 +3,8 @@ How to build an Arduino driven external meter display with a tune button for a Y
 
 See also You Tube: https://youtu.be/S7MPvK0BMc8
 
-Note: this sketch was made for an FTdx-101D. When used on a FTdx-101MP, the power meter will not show the correct power output since it has double the power. You will have to adjust the scale (-numbers) in the .ino file.
+Note: There are 2 sketches in the download. One is named FTdx-101D....and the other is named FTdx101MP....
+Be sure to use the correct file for your radio, otherwise some of the scales will be incorrect.
 
 This is a design of an Arduino (Nano) with a 2.8“ TFT acting as a simultaneous (bargraph-)display of all 9 meters available in the FTdx-101.
 
