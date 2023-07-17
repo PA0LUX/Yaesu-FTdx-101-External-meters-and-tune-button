@@ -7,7 +7,7 @@ See also You Tube: https://youtu.be/S7MPvK0BMc8
 Note: There are 2 sketches in the download. One is named FTdx-101D....and the other is named FTdx101MP....
 Be sure to use the correct file for your radio, otherwise some of the scales will be incorrect.
 
-This is a design of an Arduino (Nano) with a 2.8“ TFT acting as a simultaneous (bargraph-)display of all 9 meters available in the FTdx-101.
+This is a design of an Arduino (Nano) with a 2.8" TFT (or 3.2" with same resolution 240 x 320) acting as a simultaneous (bargraph-)display of all 9 meters available in the FTdx-101.
 
 It reads all meter settings from the radio via CAT, through the Rs232 connector. 
 The display will also show what power has been set in the radio. Besides that, it has a (momentary) pushbutton that can be used to tune the radio with 20 Watts (adjustable in .ino file).
